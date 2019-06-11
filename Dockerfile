@@ -19,6 +19,8 @@ RUN apt-get install -y wget; \
 RUN git clone https://github.com/DerrickWood/kraken2.git \
     && mkdir /opt/kraken2  \
     && cd kraken2  \
-    && sh install_kraken2.sh /opt/kraken2
+    && sh install_kraken2.sh /opt/kraken2 \
+    && cd .. \
+    && rm -r kraken2
 
 ENV PATH /opt/kraken2/:$PATH
