@@ -1,26 +1,40 @@
-FROM debian:latest
-MAINTAINER lfelipedeoliveira, felipe@lfelipedeoliveira.com
-
+FROM ubuntu:20.04
+MAINTAINER BiomeHub
 ENV DEBIAN_FRONTEND noninteractive
 
-RUN apt-get update -y; \
-    apt-get install -y apt-utils
+LABEL version="2.1.2"
+LABEL software.version="2.1.2"
+LABEL software="kraken2"
+ARG K2VER="2.1.2"
 
-RUN apt-get install -y wget; \
-    apt-get install -y git; \
-    apt-get install -y zlib1g-dev; \
-    apt-get install -y pkg-config libfreetype6-dev libpng-dev python-matplotlib; \
-    apt-get install -y python-pip; \
-    apt-get update; \
-    apt-get clean
+LABEL dockerfile.version="1"
+LABEL description="Taxonomic sequence classifier"
+LABEL website="https://github.com/DerrickWood/kraken2"
+LABEL license="https://github.com/DerrickWood/kraken2/blob/master/LICENSE"
 
-# Download & install Kraken2
+# install dependencies and cleanup apt garbage
+RUN apt-get update && apt-get -y install \
+ wget \
+ ca-certificates \
+ build-essential libtool automake zlib1g-dev libbz2-dev pkg-config \
+ make \
+ g++ \
+ rsync \
+ cpanminus \
+ bash \
+ ncbi-blast+
 
-RUN git clone https://github.com/DerrickWood/kraken2.git \
-    && mkdir /opt/kraken2  \
-    && cd kraken2  \
-    && sh install_kraken2.sh /opt/kraken2 \
-    && cd .. \
-    && rm -r kraken2
+# perl module required for kraken2-build
+RUN cpanm Getopt::Std
 
-ENV PATH /opt/kraken2/:$PATH
+
+# DL Kraken2, unpack, and install
+RUN wget https://github.com/DerrickWood/kraken2/archive/v${K2VER}.tar.gz && \
+ tar -xzf v${K2VER}.tar.gz && \
+ rm -rf v${K2VER}.tar.gz && \
+ cd kraken2-${K2VER} && \
+ ./install_kraken2.sh .
+ 
+RUN sed 's/\/dev\/null/\/usr\/bin\/dustmasker/g' kraken2-2.1.2/mask_low_complexity.sh > kraken2-2.1.2/m
+RUN mv kraken2-2.1.2/m kraken2-2.1.2/mask_low_complexity.sh
+RUN mv  kraken2-2.1.2/* /opt/
