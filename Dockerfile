@@ -35,10 +35,10 @@ RUN wget https://github.com/DerrickWood/kraken2/archive/v${K2VER}.tar.gz && \
  tar -xzf v${K2VER}.tar.gz && \
  rm -rf v${K2VER}.tar.gz && \
  cd kraken2-${K2VER} && \
- ./install_kraken2.sh .
+ ./install_kraken2.sh /usr/local/bin
  
-RUN sed 's/\/dev\/null/\/usr\/bin\/dustmasker/g' kraken2-2.1.2/mask_low_complexity.sh > kraken2-2.1.2/m
-RUN mv kraken2-2.1.2/m kraken2-2.1.2/mask_low_complexity.sh
-RUN mv  kraken2-2.1.2/* /opt/
+# RUN sed 's/\/dev\/null/\/usr\/bin\/dustmasker/g' kraken2-2.1.2/mask_low_complexity.sh > kraken2-2.1.2/m
+# RUN mv kraken2-2.1.2/m kraken2-2.1.2/mask_low_complexity.sh
+# RUN mv  kraken2-2.1.2/* /opt/
 
-ENV PATH /opt/:$PATH
+# ENV PATH /opt/:$PATH
