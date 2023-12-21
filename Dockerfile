@@ -1,8 +1,6 @@
-FROM ubuntu:20.04
-MAINTAINER BiomeHub
+FROM python:3.11
+
 ENV DEBIAN_FRONTEND noninteractive
-
-
 
 LABEL version="2.1.2"
 LABEL software.version="2.1.2"
@@ -37,8 +35,3 @@ RUN wget https://github.com/DerrickWood/kraken2/archive/v${K2VER}.tar.gz && \
  cd kraken2-${K2VER} && \
  ./install_kraken2.sh /usr/local/bin
  
-# RUN sed 's/\/dev\/null/\/usr\/bin\/dustmasker/g' kraken2-2.1.2/mask_low_complexity.sh > kraken2-2.1.2/m
-# RUN mv kraken2-2.1.2/m kraken2-2.1.2/mask_low_complexity.sh
-# RUN mv  kraken2-2.1.2/* /opt/
-
-# ENV PATH /opt/:$PATH
