@@ -1,0 +1,53 @@
+steps:
+
+  - id: build-docker-image
+    name: 'gcr.io/cloud-builders/docker'
+    args: ['build',
+        '--build-arg=INSTANCE_NAME=${_INSTANCE_NAME}',
+        '-f', 'Dockerfile',
+        '-t', 'gcr.io/$PROJECT_ID/${_INSTANCE_NAME}:$TAG_NAME',
+        '.',
+    ]
+  
+  - id: push-docker-image
+    name: gcr.io/cloud-builders/docker
+    args: ["push", "gcr.io/$PROJECT_ID/${_INSTANCE_NAME}:$TAG_NAME"]
+    waitFor:
+      - build-docker-image
+      
+  - id: login-dockerhub
+    name: 'gcr.io/cloud-builders/docker'
+    entrypoint: 'bash'
+    args: ['-c', 'docker login --username=$$USERNAME --password=$$PASSWORD']
+    secretEnv: ['USERNAME', 'PASSWORD']
+    waitFor:
+      - push-docker-image
+
+  - id: build-docker-image-dockerhub
+    name: 'gcr.io/cloud-builders/docker'
+    args: ['build',
+        '--build-arg=INSTANCE_NAME=${_INSTANCE_NAME}',
+        '-f', 'Dockerfile',
+        '-t', 'biomehub/${_INSTANCE_NAME}:$TAG_NAME',
+        '.',
+    ]
+
+  - id: push-dockerhub
+    name: 'gcr.io/cloud-builders/docker'
+    entrypoint: 'bash'
+    args: ['-c', 'docker push biomehub/${_INSTANCE_NAME}:$TAG_NAME']
+    waitFor:
+      - build-docker-image-dockerhub
+    secretEnv: ['USERNAME']
+
+availableSecrets:
+  secretManager:
+    - versionName: projects/$PROJECT_ID/secrets/docker-password/versions/1
+      env: 'PASSWORD'
+    - versionName: projects/$PROJECT_ID/secrets/docker-username/versions/1
+      env: 'USERNAME'
+
+
+
+images:
+- 'gcr.io/$PROJECT_ID/${_INSTANCE_NAME}:$TAG_NAME'
